@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a7a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Kas Pengajian</title>
+<style>
+  :root {
+    --green-900: #0d4a2a;
+    --green-800: #155c35;
+    --green-700: #1a7a4a;
+    --green-600: #22944f;
+    --green-500: #2aad5c;
+    --green-400: #4dc97f;
+    --green-300: #80dea0;
+    --green-100: #e8f7ee;
+    --green-50: #f2fbf5;
+    --red-500: #e53935;
+    --red-100: #fdecea;
+    --amber-500: #f59e0b;
+    --amber-100: #fef3c7;
+    --blue-500: #3b82f6;
+    --blue-100: #eff6ff;
+    --purple-500: #8b5cf6;
+    --purple-100: #f5f3ff;
+    --bg: #f4f7f5;
+    --surface: #ffffff;
+    --surface2: #f0f4f2;
+    --text: #1a2e23;
+    --text2: #4a6355;
+    --text3: #8aad9a;
+    --border: #ddeee4;
+    --shadow: 0 2px 12px rgba(26,122,74,0.08);
+    --shadow-md: 0 4px 24px rgba(26,122,74,0.12);
+    --shadow-lg: 0 8px 40px rgba(26,122,74,0.18);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --transition: 200ms cubic-bezier(0.4,0,0.2,1);
+  }
+  [data-theme="dark"] {
+    --bg: #0e1f17;
+    --surface: #162d1f;
+    --surface2: #1d3829;
+    --text: #e8f5ed;
+    --text2: #9ec4ad;
+    --text3: #5a8a6a;
+    --border: #2a4a37;
+    --shadow: 0 2px 12px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --green-100: #1d3829;
+    --green-50: #162d1f;
+    --red-100: #2d1515;
+    --amber-100: #2d2410;
+    --blue-100: #101a2d;
+    --purple-100: #1e1528;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+  #app { height: 100vh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; position: relative; background: var(--bg); }
+  
+  /* SCROLLABLE CONTENT */
+  .page { flex: 1; overflow-y: auto; padding-bottom: 80px; scroll-behavior: smooth; }
+  .page::-webkit-scrollbar { width: 0; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; height: 64px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; cursor: pointer; transition: color var(--transition); color: var(--text3); border: none; background: none; font-size: 10px; }
+  .nav-item.active { color: var(--green-700); }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-add { width: 52px; height: 52px; background: var(--green-700); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; box-shadow: var(--shadow-md); transition: transform var(--transition), box-shadow var(--transition); flex-shrink: 0; margin: 0 4px; }
+  .nav-add:active { transform: scale(0.93); }
+  .nav-add svg { width: 26px; height: 26px; color: white; }
+
+  /* FAB SPEED DIAL */
+  .fab-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+  .fab-overlay.open { opacity: 1; pointer-events: all; }
+  .fab-menu { position: fixed; bottom: 72px; right: 50%; transform: translateX(240px); display: flex; flex-direction: column; gap: 12px; z-index: 201; align-items: flex-end; }
+  @media(max-width:480px) { .fab-menu { right: 16px; transform: none; } }
+  .fab-item { display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateY(16px); transition: opacity 200ms, transform 200ms; pointer-events: none; }
+  .fab-item.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+  .fab-item:nth-child(1) { transition-delay: 80ms; }
+  .fab-item:nth-child(2) { transition-delay: 40ms; }
+  .fab-item:nth-child(3) { transition-delay: 0ms; }
+  .fab-label { background: var(--surface); color: var(--text); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow); white-space: nowrap; }
+  .fab-btn { width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); transition: transform var(--transition); flex-shrink: 0; }
+  .fab-btn:active { transform: scale(0.92); }
+  .fab-btn.green { background: var(--green-700); }
+  .fab-btn.red { background: var(--red-500); }
+  .fab-btn.amber { background: var(--amber-500); }
+  .fab-btn svg { width: 22px; height: 22px; color: white; }
+
+  /* HEADER */
+  .header { padding: 16px 20px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .header-greeting { font-size: 13px; color: var(--text2); }
+  .header-title { font-size: 20px; font-weight: 700; color: var(--text); }
+  .header-icon { width: 40px; height: 40px; background: var(--green-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: background var(--transition); }
+  .header-icon:active { background: var(--green-300); }
+  .header-icon svg { width: 20px; height: 20px; color: var(--green-700); }
+
+  /* HERO CARD */
+  .hero-card { margin: 0 16px 16px; border-radius: var(--radius); padding: 24px; background: linear-gradient(135deg, var(--green-800) 0%, var(--green-600) 60%, var(--green-400) 100%); color: white; position: relative; overflow: hidden; box-shadow: var(--shadow-lg); }
+  .hero-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+  .hero-card::after { content: ''; position: absolute; bottom: -40px; right: 40px; width: 90px; height: 90px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+  .hero-label { font-size: 12px; opacity: 0.8; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .hero-label button { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 0; display: flex; align-items: center; }
+  .hero-label button svg { width: 14px; height: 14px; }
+  .hero-balance { font-size: 30px; font-weight: 800; margin: 6px 0 4px; letter-spacing: -0.5px; transition: filter var(--transition); }
+  .hero-balance.hidden { filter: blur(8px); user-select: none; }
+  .hero-meta { font-size: 11px; opacity: 0.7; }
+  .hero-stats { display: flex; gap: 0; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15); }
+  .hero-stat { flex: 1; }
+  .hero-stat + .hero-stat { border-left: 1px solid rgba(255,255,255,0.15); padding-left: 16px; }
+  .hero-stat-label { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+  .hero-stat-label span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); display: inline-block; }
+  .hero-stat-label span.red { background: #ff8a8a; }
+  .hero-stat-value { font-size: 14px; font-weight: 700; }
+
+  /* QUICK STATS */
+  .section-title { padding: 4px 20px 10px; font-size: 14px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 4px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius-sm); padding: 14px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); }
+  .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stat-icon svg { width: 22px; height: 22px; }
+  .stat-icon.green { background: var(--green-100); color: var(--green-700); }
+  .stat-icon.red { background: var(--red-100); color: var(--red-500); }
+  .stat-icon.amber { background: var(--amber-100); color: var(--amber-500); }
+  .stat-icon.purple { background: var(--purple-100); color: var(--purple-500); }
+  .stat-info { min-width: 0; }
+  .stat-info-label { font-size: 10px; color: var(--text3); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-info-value { font-size: 14px; font-weight: 700; color: var(--text); }
+
+  /* QUICK ACTIONS */
+  .quick-actions { display: flex; gap: 10px; padding: 0 16px 4px; }
+  .qa-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: transform var(--transition), box-shadow var(--transition); }
+  .qa-btn:active { transform: scale(0.96); }
+  .qa-btn.green { background: var(--green-700); color: white; box-shadow: 0 4px 16px rgba(26,122,74,0.3); }
+  .qa-btn.red { background: var(--red-500); color: white; box-shadow: 0 4px 16px rgba(229,57,53,0.3); }
+  .qa-btn.blue { background: var(--blue-500); color: white; box-shadow: 0 4px 16px rgba(59,130,246,0.3); }
+  .qa-btn svg { width: 24px; height: 24px; }
+  .qa-btn span { font-size: 11px; font-weight: 600; }
+
+  /* TRANSACTIONS LIST */
+  .tx-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .tx-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 20px 10px; }
+  .tx-header a { font-size: 13px; color: var(--green-700); font-weight: 600; cursor: pointer; background: none; border: none; }
+  .tx-item { background: var(--surface); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform var(--transition); animation: slideIn 250ms ease; }
+  .tx-item:active { transform: scale(0.98); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .tx-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tx-icon svg { width: 20px; height: 20px; }
+  .tx-icon.green { background: var(--green-100); color: var(--green-700); }
+  .tx-icon.red { background: var(--red-100); color: var(--red-500); }
+  .tx-icon.amber { background: var(--amber-100); color: var(--amber-500); }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .tx-amount { font-size: 14px; font-weight: 700; }
+  .tx-amount.pos { color: var(--green-600); }
+  .tx-amount.neg { color: var(--red-500); }
+  .tx-amount.inf { color: var(--amber-500); }
+  .tx-menu-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text3); }
+  .tx-menu-btn svg { width: 18px; height: 18px; }
+
+  /* EMPTY STATE */
+  .empty-state { display: flex; flex-direction: column; align-items: center; padding: 40px 24px; text-align: center; }
+  .empty-icon { width: 80px; height: 80px; background: var(--green-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .empty-icon svg { width: 40px; height: 40px; color: var(--green-400); }
+  .empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* SKELETON */
+  .skeleton { background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skeleton-card { height: 140px; border-radius: var(--radius); margin: 0 16px 16px; }
+  .skeleton-row { height: 64px; border-radius: var(--radius-sm); margin-bottom: 8px; }
+
+  /* MODAL OVERLAY */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border-radius: 24px 24px 0 0; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; transform: translateY(100%); transition: transform 300ms cubic-bezier(0.34,1.56,0.64,1); }
+  .modal::-webkit-scrollbar { width: 0; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 8px; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px 16px; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { width: 32px; height: 32px; background: var(--surface2); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--transition); }
+  .modal-close:active { background: var(--border); }
+  .modal-close svg { width: 16px; height: 16px; color: var(--text2); }
+
+  /* TYPE TABS */
+  .type-tabs { display: flex; gap: 8px; padding: 0 20px 16px; }
+  .type-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--surface); cursor: pointer; transition: all var(--transition); font-size: 12px; font-weight: 600; color: var(--text2); }
+  .type-tab svg { width: 22px; height: 22px; }
+  .type-tab.active.green { border-color: var(--green-600); background: var(--green-100); color: var(--green-700); }
+  .type-tab.active.red { border-color: var(--red-500); background: var(--red-100); color: var(--red-500); }
+  .type-tab.active.amber { border-color: var(--amber-500); background: var(--amber-100); color: var(--amber-500); }
+
+  /* FORM */
+  .form-group { padding: 0 20px 16px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .form-input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-xs); background: var(--surface2); color: var(--text); font-size: 15px; outline: none; transition: border-color var(--transition); font-family: inherit; }
+  .form-input:focus { border-color: var(--green-600); background: var(--surface); }
+  .form-input::placeholder { color: var(--text3); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%238aad9a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+  
+  /* NUMPAD */
+  .numpad-display { margin: 0 20px 16px; padding: 14px 16px; background: var(--surface2); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--border); }
+  .numpad-display span { font-size: 22px; font-weight: 700; color: var(--text); }
+  .numpad-display button { background: none; border: none; cursor: pointer; color: var(--text3); padding: 4px; }
+  .numpad-display button svg { width: 20px; height: 20px; }
+  .numpad-quickadd { display: flex; gap: 8px; padding: 0 20px 12px; }
+  .numpad-quickadd button { flex: 1; padding: 8px 4px; border: 1.5px solid var(--green-600); border-radius: 20px; background: none; color: var(--green-700); font-size: 12px; font-weight: 600; cursor: pointer; transition: all var(--transition); }
+  .numpad-quickadd button:active { background: var(--green-100); }
+  .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 20px 16px; }
+  .numpad-key { padding: 16px; border: none; border-radius: var(--radius-xs); background: var(--surface2); color: var(--text); font-size: 20px; font-weight: 600; cursor: pointer; transition: background var(--transition), transform var(--transition); display: flex; align-items: center; justify-content: center; }
+  .numpad-key:active { background: var(--border); transform: scale(0.94); }
+  .numpad-key.backspace { color: var(--text2); }
+  .modal-actions { display: flex; gap: 10px; padding: 8px 20px 24px; }
+  .btn { flex: 1; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; transition: transform var(--transition), box-shadow var(--transition); }
+  .btn:active { transform: scale(0.97); }
+  .btn-outline { background: var(--surface2); color: var(--text2); }
+  .btn-primary { background: var(--green-700); color: white; box-shadow: 0 4px 16px rgba(26,122,74,0.3); }
+  .btn-primary.red { background: var(--red-500); box-shadow: 0 4px 16px rgba(229,57,53,0.25); }
+  .btn-primary.amber { background: var(--amber-500); box-shadow: 0 4px 16px rgba(245,158,11,0.25); }
+  .btn-danger { background: var(--red-100); color: var(--red-500); }
+
+  /* TRANSACTIONS PAGE */
+  .filter-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+  .filter-bar::-webkit-scrollbar { height: 0; }
+  .filter-chip { padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all var(--transition); flex-shrink: 0; }
+  .filter-chip.active { background: var(--green-700); color: white; border-color: var(--green-700); }
+  .search-bar { display: flex; align-items: center; gap: 10px; margin: 0 16px 4px; padding: 10px 14px; background: var(--surface); border-radius: var(--radius-xs); border: 1.5px solid var(--border); }
+  .search-bar svg { width: 18px; height: 18px; color: var(--text3); flex-shrink: 0; }
+  .search-bar input { flex: 1; border: none; background: none; color: var(--text); font-size: 14px; outline: none; font-family: inherit; }
+  .search-bar input::placeholder { color: var(--text3); }
+
+  /* REPORT PAGE */
+  .report-tabs { display: flex; gap: 0; margin: 12px 16px; background: var(--surface2); border-radius: var(--radius-xs); padding: 4px; }
+  .report-tab { flex: 1; padding: 9px 8px; text-align: center; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; color: var(--text2); transition: all var(--transition); border: none; background: none; }
+  .report-tab.active { background: var(--surface); color: var(--green-700); box-shadow: var(--shadow); }
+  .report-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+  .report-card { background: var(--surface); border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .report-card-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .report-card-label span { width: 8px; height: 8px; border-radius: 50%; }
+  .report-card-value { font-size: 16px; font-weight: 800; }
+  .report-card-value.green { color: var(--green-600); }
+  .report-card-value.red { color: var(--red-500); }
+  .report-card-value.amber { color: var(--amber-500); }
+  .report-card-value.blue { color: var(--blue-500); }
+  .chart-container { margin: 0 16px 16px; background: var(--surface); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; }
+  .chart-wrap { position: relative; height: 140px; display: flex; align-items: flex-end; gap: 4px; }
+  .chart-bar-group { flex: 1; display: flex; gap: 2px; align-items: flex-end; height: 100%; }
+  .chart-bar { flex: 1; border-radius: 4px 4px 0 0; transition: height 500ms cubic-bezier(0.34,1.56,0.64,1); min-height: 2px; }
+  .chart-bar.income { background: var(--green-500); }
+  .chart-bar.expense { background: var(--red-500); }
+  .chart-labels { display: flex; gap: 4px; padding: 6px 0 0; }
+  .chart-label { flex: 1; text-align: center; font-size: 9px; color: var(--text3); }
+  .chart-legend { display: flex; gap: 16px; margin-top: 10px; }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* SETTINGS PAGE */
+  .settings-section { margin: 0 16px 16px; background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+  .settings-section-title { padding: 10px 16px 4px; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+  .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; transition: background var(--transition); border-top: 1px solid var(--border); }
+  .settings-item:first-of-type { border-top: none; }
+  .settings-item:active { background: var(--surface2); }
+  .settings-item-left { display: flex; align-items: center; gap: 12px; }
+  .settings-item-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .settings-item-icon svg { width: 18px; height: 18px; }
+  .settings-item-icon.green { background: var(--green-100); color: var(--green-700); }
+  .settings-item-icon.blue { background: var(--blue-100); color: var(--blue-500); }
+  .settings-item-icon.amber { background: var(--amber-100); color: var(--amber-500); }
+  .settings-item-icon.red { background: var(--red-100); color: var(--red-500); }
+  .settings-item-icon.purple { background: var(--purple-100); color: var(--purple-500); }
+  .settings-item-text { font-size: 14px; font-weight: 500; color: var(--text); }
+  .settings-item-arrow { color: var(--text3); }
+  .settings-item-arrow svg { width: 16px; height: 16px; }
+  .toggle { width: 44px; height: 24px; background: var(--border); border-radius: 12px; position: relative; cursor: pointer; transition: background var(--transition); border: none; flex-shrink: 0; }
+  .toggle.on { background: var(--green-600); }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform var(--transition); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  .toggle.on::after { transform: translateX(20px); }
+
+  /* TOAST */
+  .toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: 100%; max-width: 440px; padding: 0 20px; }
+  .toast { padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; color: white; box-shadow: var(--shadow-lg); animation: toastIn 300ms cubic-bezier(0.34,1.56,0.64,1); display: flex; align-items: center; gap: 8px; }
+  .toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .toast.success { background: var(--green-700); }
+  .toast.error { background: var(--red-500); }
+  .toast.info { background: var(--blue-500); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(16px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+
+  /* CONFIRM MODAL */
+  .confirm-modal { background: var(--surface); border-radius: 20px; width: calc(100% - 48px); max-width: 360px; padding: 24px; margin: auto; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); opacity: 0; transition: all 250ms; z-index: 400; }
+  .confirm-modal.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 399; opacity: 0; transition: opacity 250ms; pointer-events: none; }
+  .confirm-overlay.show { opacity: 1; pointer-events: all; }
+  .confirm-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--red-100); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .confirm-icon svg { width: 28px; height: 28px; color: var(--red-500); }
+  .confirm-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  .confirm-desc { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+
+  /* CONTEXT MENU */
+  .ctx-menu { position: fixed; background: var(--surface); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 500; min-width: 160px; overflow: hidden; border: 1px solid var(--border); opacity: 0; transform: scale(0.92); transition: all 150ms; pointer-events: none; }
+  .ctx-menu.show { opacity: 1; transform: scale(1); pointer-events: all; }
+  .ctx-menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background var(--transition); color: var(--text); }
+  .ctx-menu-item:active { background: var(--surface2); }
+  .ctx-menu-item.danger { color: var(--red-500); }
+  .ctx-menu-item svg { width: 16px; height: 16px; }
+
+  /* APP ICON */
+  .app-brand { display: flex; align-items: center; gap: 10px; }
+  .app-brand-icon { width: 36px; height: 36px; background: var(--green-700); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .app-brand-icon svg { width: 20px; height: 20px; color: white; }
+
+  /* NAV CENTER SLOT */
+  .nav-center { flex: 0 0 64px; display: flex; justify-content: center; }
+
+  /* PERIOD NAV */
+  .period-nav { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 16px; }
+  .period-nav button { width: 36px; height: 36px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); transition: all var(--transition); }
+  .period-nav button:active { background: var(--green-100); border-color: var(--green-600); color: var(--green-700); }
+  .period-nav button svg { width: 16px; height: 16px; }
+  .period-nav span { font-size: 15px; font-weight: 700; color: var(--text); }
+
+  .page-hidden { display: none !important; }
+
+  /* DETAIL MODAL */
+  .detail-row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-key { font-size: 13px; color: var(--text2); }
+  .detail-val { font-size: 13px; font-weight: 600; color: var(--text); text-align: right; }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1f17; --surface: #162d1f; --surface2: #1d3829; --text: #e8f5ed; --text2: #9ec4ad; --text3: #5a8a6a; --border: #2a4a37; --shadow: 0 2px 12px rgba(0,0,0,0.3); --shadow-md: 0 4px 24px rgba(0,0,0,0.4); --shadow-lg: 0 8px 40px rgba(0,0,0,0.5); --green-100: #1d3829; --green-50: #162d1f; --red-100: #2d1515; --amber-100: #2d2410; --blue-100: #101a2d; --purple-100: #1e1528;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- PAGES -->
+  <div id="page-dashboard" class="page">
+    <div class="header">
+      <div>
+        <div class="header-greeting">Assalamu'alaikum,</div>
+        <div class="header-title">Bendahara</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="header-icon" onclick="toggleDark()">
+          <svg id="theme-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+        <button class="header-icon" onclick="showPage('settings')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Hero -->
+    <div class="hero-card" id="hero-card">
+      <div class="hero-label">
+        Saldo Kas
+        <button onclick="toggleBalanceVisibility()">
+          <svg id="eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        </button>
+      </div>
+      <div class="hero-balance" id="hero-balance">Rp 0</div>
+      <div class="hero-meta" id="hero-meta">Update terakhir: —</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-label"><span></span> Pemasukan</div>
+          <div class="hero-stat-value" id="hero-income">Rp 0</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label"><span class="red"></span> Pengeluaran</div>
+          <div class="hero-stat-value" id="hero-expense">Rp 0</div>
+        </div>
+      </div>
+    </div>
+    <!-- Stats Grid -->
+    <div class="section-title">Ringkasan Bulan Ini</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div>
+        <div class="stat-info"><div class="stat-info-label">Total Pemasukan</div><div class="stat-info-value" id="stat-income">Rp 0</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div>
+        <div class="stat-info"><div class="stat-info-label">Total Pengeluaran</div><div class="stat-info-value" id="stat-expense">Rp 0</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <div class="stat-info"><div class="stat-info-label">Total Infak</div><div class="stat-info-value" id="stat-infak">Rp 0</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+        <div class="stat-info"><div class="stat-info-label">Jumlah Transaksi</div><div class="stat-info-value" id="stat-count">0</div></div>
+      </div>
+    </div>
+    <!-- Quick Actions -->
+    <div class="section-title" style="margin-top:12px">Aksi Cepat</div>
+    <div class="quick-actions">
+      <button class="qa-btn green" onclick="openModal('income')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>Pemasukan</span>
+      </button>
+      <button class="qa-btn red" onclick="openModal('expense')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+        <span>Pengeluaran</span>
+      </button>
+      <button class="qa-btn blue" onclick="openModal('infak')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        <span>Infak Hari Ini</span>
+      </button>
+    </div>
+    <!-- Recent Transactions -->
+    <div class="tx-header" style="margin-top:12px">
+      <div class="section-title" style="padding:0">Transaksi Terbaru</div>
+      <button class="tx-header a" onclick="showPage('transactions')" style="font-size:13px;color:var(--green-700);font-weight:600;background:none;border:none;cursor:pointer">Lihat Semua</button>
+    </div>
+    <div class="tx-list" id="recent-tx-list"></div>
+  </div>
+
+  <!-- TRANSACTIONS PAGE -->
+  <div id="page-transactions" class="page page-hidden">
+    <div class="header">
+      <div class="header-title">Transaksi</div>
+      <button class="header-icon" onclick="openModal('income')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      </button>
+    </div>
+    <div class="search-bar">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="search-input" placeholder="Cari transaksi..." oninput="renderTransactions()">
+    </div>
+    <div class="filter-bar">
+      <div class="filter-chip active" onclick="setFilter('all',this)">Semua</div>
+      <div class="filter-chip" onclick="setFilter('income',this)">Pemasukan</div>
+      <div class="filter-chip" onclick="setFilter('expense',this)">Pengeluaran</div>
+      <div class="filter-chip" onclick="setFilter('infak',this)">Infak</div>
+    </div>
+    <div class="tx-list" id="all-tx-list"></div>
+  </div>
+
+  <!-- REPORT PAGE -->
+  <div id="page-report" class="page page-hidden">
+    <div class="header"><div class="header-title">Laporan</div></div>
+    <div class="report-tabs">
+      <button class="report-tab active" onclick="setReportTab('today',this)">Hari Ini</button>
+      <button class="report-tab" onclick="setReportTab('month',this)">Bulan Ini</button>
+      <button class="report-tab" onclick="setReportTab('year',this)">Tahun Ini</button>
+    </div>
+    <div class="period-nav">
+      <button onclick="changePeriod(-1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+      <span id="period-label">—</span>
+      <button onclick="changePeriod(1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="report-summary">
+      <div class="report-card"><div class="report-card-label"><span style="background:var(--green-500)"></span>Pemasukan</div><div class="report-card-value green" id="rep-income">Rp 0</div></div>
+      <div class="report-card"><div class="report-card-label"><span style="background:var(--red-500)"></span>Pengeluaran</div><div class="report-card-value red" id="rep-expense">Rp 0</div></div>
+      <div class="report-card"><div class="report-card-label"><span style="background:var(--amber-500)"></span>Infak</div><div class="report-card-value amber" id="rep-infak">Rp 0</div></div>
+      <div class="report-card"><div class="report-card-label"><span style="background:var(--blue-500)"></span>Saldo Akhir</div><div class="report-card-value blue" id="rep-balance">Rp 0</div></div>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">Grafik Transaksi</div>
+      <div class="chart-wrap" id="chart-bars"></div>
+      <div class="chart-labels" id="chart-labels"></div>
+      <div class="chart-legend">
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--green-500)"></div>Pemasukan</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--red-500)"></div>Pengeluaran</div>
+      </div>
+    </div>
+    <div class="tx-list" id="report-tx-list"></div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div id="page-settings" class="page page-hidden">
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="app-brand-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg></div>
+        <div><div class="header-title">Pengaturan</div><div style="font-size:11px;color:var(--text3)">Kas Pengajian v1.0</div></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">TAMPILAN</div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-icon purple"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div>
+          <div class="settings-item-text">Mode Gelap</div>
+        </div>
+        <button class="toggle" id="dark-toggle" onclick="toggleDark()"></button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">DATA</div>
+      <div class="settings-item" onclick="backupData()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg></div>
+          <div class="settings-item-text">Backup Data (JSON)</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="settings-item" onclick="restoreData()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div>
+          <div class="settings-item-text">Restore Data (JSON)</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="settings-item" onclick="exportCSV()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon amber"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+          <div class="settings-item-text">Export Data (CSV)</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="settings-item" onclick="exportJSON()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div>
+          <div class="settings-item-text">Export Data (JSON)</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">BERBAHAYA</div>
+      <div class="settings-item" onclick="confirmDelete()">
+        <div class="settings-item-left">
+          <div class="settings-item-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+          <div class="settings-item-text" style="color:var(--red-500)">Hapus Semua Data</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">TENTANG</div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-left">
+          <div class="settings-item-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <div class="settings-item-text">Tentang Aplikasi</div>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">v1.0.0</div>
+      </div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-left">
+          <div class="settings-item-icon blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+          <div class="settings-item-text">Privasi & Keamanan</div>
+        </div>
+        <div class="settings-item-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" id="nav-transactions" onclick="showPage('transactions')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+      <span>Transaksi</span>
+    </button>
+    <div class="nav-center">
+      <button class="nav-add" onclick="toggleFAB()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      </button>
+    </div>
+    <button class="nav-item" id="nav-report" onclick="showPage('report')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span>Laporan</span>
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="showPage('settings')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span>Pengaturan</span>
+    </button>
+  </nav>
+
+  <!-- FAB OVERLAY -->
+  <div class="fab-overlay" id="fab-overlay" onclick="closeFAB()"></div>
+  <div class="fab-menu" id="fab-menu">
+    <div class="fab-item" id="fab-1">
+      <div class="fab-label">Tambah Pemasukan</div>
+      <button class="fab-btn green" onclick="closeFAB();openModal('income')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+      </button>
+    </div>
+    <div class="fab-item" id="fab-2">
+      <div class="fab-label">Tambah Pengeluaran</div>
+      <button class="fab-btn red" onclick="closeFAB();openModal('expense')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+      </button>
+    </div>
+    <div class="fab-item" id="fab-3">
+      <div class="fab-label">Input Infak</div>
+      <button class="fab-btn amber" onclick="closeFAB();openModal('infak')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- TRANSACTION MODAL -->
+  <div class="modal-overlay" id="tx-modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">Tambah Transaksi</div>
+        <button class="modal-close" onclick="closeModal()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="type-tabs" id="type-tabs">
+        <div class="type-tab active green" onclick="setType('income',this)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+          Pemasukan
+        </div>
+        <div class="type-tab red" onclick="setType('expense',this)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+          Pengeluaran
+        </div>
+        <div class="type-tab amber" onclick="setType('infak',this)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          Infak
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Tanggal</div>
+        <input type="date" class="form-input" id="tx-date">
+      </div>
+      <div class="form-group" id="source-group">
+        <div class="form-label">Keterangan</div>
+        <input type="text" class="form-input" id="tx-source" placeholder="Contoh: Donatur, Kas Mingguan, Infak Jamaah">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Nominal</div>
+      </div>
+      <div class="numpad-display">
+        <span id="numpad-display">Rp 0</span>
+        <button onclick="clearNum()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/></svg></button>
+      </div>
+      <div class="numpad-quickadd" id="quick-add-btns">
+        <button onclick="addQuick(10000)">+10rb</button>
+        <button onclick="addQuick(20000)">+20rb</button>
+        <button onclick="addQuick(50000)">+50rb</button>
+        <button onclick="addQuick(100000)">+100rb</button>
+      </div>
+      <div class="numpad-grid">
+        <button class="numpad-key" onclick="pressNum('1')">1</button>
+        <button class="numpad-key" onclick="pressNum('2')">2</button>
+        <button class="numpad-key" onclick="pressNum('3')">3</button>
+        <button class="numpad-key" onclick="pressNum('4')">4</button>
+        <button class="numpad-key" onclick="pressNum('5')">5</button>
+        <button class="numpad-key" onclick="pressNum('6')">6</button>
+        <button class="numpad-key" onclick="pressNum('7')">7</button>
+        <button class="numpad-key" onclick="pressNum('8')">8</button>
+        <button class="numpad-key" onclick="pressNum('9')">9</button>
+        <button class="numpad-key" onclick="pressNum('.')">.</button>
+        <button class="numpad-key" onclick="pressNum('0')">0</button>
+        <button class="numpad-key backspace" onclick="backspaceNum()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/></svg></button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" id="save-btn" onclick="saveTransaction()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">Detail Transaksi</div>
+        <button class="modal-close" onclick="closeDetailModal()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div id="detail-content"></div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" onclick="deleteFromDetail()">Hapus</button>
+        <button class="btn btn-outline" onclick="closeDetailModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM OVERLAY -->
+  <div class="confirm-overlay" id="confirm-overlay"></div>
+  <div class="confirm-modal" id="confirm-modal">
+    <div class="confirm-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
+    <div class="confirm-title">Hapus Semua Data?</div>
+    <div class="confirm-desc">Tindakan ini tidak dapat dibatalkan. Semua data transaksi akan dihapus permanen.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">Batal</button>
+      <button class="btn btn-primary red" onclick="deleteAllData()">Hapus</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- HIDDEN FILE INPUT -->
+  <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleRestore(event)">
+
+  <!-- CONTEXT MENU -->
+  <div class="ctx-menu" id="ctx-menu">
+    <div class="ctx-menu-item" onclick="editFromCtx()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Lihat Detail</div>
+    <div class="ctx-menu-item danger" onclick="deleteFromCtx()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>Hapus</div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+let db = { transactions: [] };
+let currentPage = 'dashboard';
+let currentType = 'income';
+let numStr = '';
+let txFilter = 'all';
+let reportTab = 'month';
+let reportPeriodOffset = 0;
+let balanceHidden = false;
+let fabOpen = false;
+let ctxId = null;
+let detailId = null;
+let editingId = null;
+
+const STORAGE_KEY = 'kas_pengajian_v1';
+const DARK_KEY = 'kas_dark';
+
+// ==================== INIT ====================
+function init() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) try { db = JSON.parse(saved); } catch(e) {}
+  if (!db.transactions) db.transactions = [];
+
+  const dark = localStorage.getItem(DARK_KEY);
+  if (dark === 'true') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('dark-toggle').classList.add('on');
+  }
+
+  // Set today's date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tx-date').value = today;
+
+  renderDashboard();
+  showPage('dashboard', true);
+}
+
+// ==================== SAVE ====================
+function saveDB() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+}
+
+// ==================== CURRENCY ====================
+function fmt(n) {
+  return 'Rp ' + Math.abs(n).toLocaleString('id-ID');
+}
+
+function fmtDate(d) {
+  const date = new Date(d);
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ==================== PAGE NAV ====================
+function showPage(page, skipAnim) {
+  ['dashboard','transactions','report','settings'].forEach(p => {
+    document.getElementById('page-' + p).classList.add('page-hidden');
+    document.getElementById('nav-' + p)?.classList.remove('active');
+  });
+  document.getElementById('page-' + page).classList.remove('page-hidden');
+  document.getElementById('nav-' + page)?.classList.add('active');
+
+  // Scroll to top
+  document.getElementById('page-' + page).scrollTop = 0;
+
+  currentPage = page;
+
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'transactions') renderTransactions();
+  if (page === 'report') renderReport();
+}
+
+// ==================== FAB ====================
+function toggleFAB() {
+  fabOpen ? closeFAB() : openFAB();
+}
+
+function openFAB() {
+  fabOpen = true;
+  document.getElementById('fab-overlay').classList.add('open');
+  // rotate + icon
+  document.querySelector('.nav-add svg').style.transform = 'rotate(45deg)';
+  document.querySelector('.nav-add svg').style.transition = 'transform 250ms';
+  [1,2,3].forEach(i => {
+    setTimeout(() => document.getElementById('fab-' + i).classList.add('visible'), (3-i)*40);
+  });
+}
+
+function closeFAB() {
+  fabOpen = false;
+  document.getElementById('fab-overlay').classList.remove('open');
+  document.querySelector('.nav-add svg').style.transform = '';
+  [1,2,3].forEach(i => document.getElementById('fab-' + i).classList.remove('visible'));
+}
+
+// ==================== MODAL ====================
+function openModal(type, id) {
+  editingId = id || null;
+  setType(type === 'income' ? 'income' : type === 'expense' ? 'expense' : 'infak', null, true);
+
+  if (editingId) {
+    const tx = db.transactions.find(t => t.id === editingId);
+    if (tx) {
+      numStr = String(tx.amount);
+      updateNumDisplay();
+      document.getElementById('tx-date').value = tx.date;
+      document.getElementById('tx-source').value = tx.source || '';
+      document.getElementById('modal-title').textContent = 'Edit Transaksi';
+      document.getElementById('save-btn').textContent = 'Simpan';
+    }
+  } else {
+    numStr = '';
+    updateNumDisplay();
+    document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('tx-source').value = '';
+    document.getElementById('modal-title').textContent = type === 'infak' ? 'Input Infak Hari Ini' : 'Tambah Transaksi';
+    document.getElementById('save-btn').textContent = type === 'infak' ? 'Simpan Infak' : 'Simpan';
+  }
+
+  document.getElementById('tx-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('tx-modal').classList.remove('open');
+  editingId = null;
+}
+
+function setType(type, el, skipFind) {
+  currentType = type;
+  if (!skipFind) {
+    // update tabs
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    if (el) {
+      el.classList.add('active');
+    } else {
+      const idx = type === 'income' ? 0 : type === 'expense' ? 1 : 2;
+      document.querySelectorAll('.type-tab')[idx]?.classList.add('active');
+    }
+  } else {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    const idx = type === 'income' ? 0 : type === 'expense' ? 1 : 2;
+    document.querySelectorAll('.type-tab')[idx]?.classList.add('active');
+  }
+
+  const saveBtn = document.getElementById('save-btn');
+  if (type === 'income') {
+    saveBtn.className = 'btn btn-primary';
+    saveBtn.style.background = '';
+  } else if (type === 'expense') {
+    saveBtn.className = 'btn btn-primary red';
+  } else {
+    saveBtn.className = 'btn btn-primary amber';
+  }
+}
+
+// ==================== NUMPAD ====================
+function pressNum(n) {
+  if (n === '.' && numStr.includes('.')) return;
+  if (numStr.length >= 12) return;
+  numStr += n;
+  updateNumDisplay();
+}
+
+function backspaceNum() {
+  numStr = numStr.slice(0, -1);
+  updateNumDisplay();
+}
+
+function clearNum() {
+  numStr = '';
+  updateNumDisplay();
+}
+
+function addQuick(amount) {
+  let current = parseFloat(numStr) || 0;
+  numStr = String(current + amount);
+  updateNumDisplay();
+}
+
+function updateNumDisplay() {
+  const val = parseFloat(numStr) || 0;
+  document.getElementById('numpad-display').textContent = 'Rp ' + val.toLocaleString('id-ID');
+}
+
+// ==================== SAVE TX ====================
+function saveTransaction() {
+  const amount = parseFloat(numStr) || 0;
+  if (amount <= 0) { showToast('Nominal harus lebih dari 0', 'error'); return; }
+
+  const date = document.getElementById('tx-date').value;
+  const source = document.getElementById('tx-source').value.trim() || (
+    currentType === 'income' ? 'Pemasukan' : currentType === 'expense' ? 'Pengeluaran' : 'Infak Harian'
+  );
+
+  if (editingId) {
+    const idx = db.transactions.findIndex(t => t.id === editingId);
+    if (idx !== -1) {
+      db.transactions[idx] = { ...db.transactions[idx], amount, date, source, type: currentType };
+      showToast('Transaksi diperbarui', 'info');
+    }
+  } else {
+    const tx = {
+      id: Date.now().toString(),
+      type: currentType,
+      amount,
+      date,
+      source,
+      createdAt: new Date().toISOString()
+    };
+    db.transactions.unshift(tx);
+    showToast(
+      currentType === 'income' ? 'Pemasukan berhasil disimpan' :
+      currentType === 'expense' ? 'Pengeluaran berhasil disimpan' :
+      'Infak berhasil dicatat', 'success'
+    );
+  }
+
+  saveDB();
+  closeModal();
+  renderDashboard();
+  if (currentPage === 'transactions') renderTransactions();
+  if (currentPage === 'report') renderReport();
+}
+
+// ==================== RENDER DASHBOARD ====================
+function renderDashboard() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthTxs = db.transactions.filter(t => new Date(t.date) >= monthStart);
+
+  const income = monthTxs.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  const expense = monthTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+  const infak = monthTxs.filter(t => t.type === 'infak').reduce((s,t) => s+t.amount, 0);
+
+  const allIncome = db.transactions.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  const allExpense = db.transactions.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+  const allInfak = db.transactions.filter(t => t.type === 'infak').reduce((s,t) => s+t.amount, 0);
+  const balance = allIncome - allExpense - allInfak;
+
+  document.getElementById('hero-balance').textContent = fmt(balance);
+  if (balanceHidden) document.getElementById('hero-balance').classList.add('hidden');
+
+  const lastTx = db.transactions[0];
+  document.getElementById('hero-meta').textContent = lastTx
+    ? 'Update terakhir: ' + fmtDate(lastTx.date) + ', ' + fmtTime(lastTx.createdAt)
+    : 'Belum ada transaksi';
+
+  document.getElementById('hero-income').textContent = fmt(allIncome);
+  document.getElementById('hero-expense').textContent = fmt(allExpense);
+
+  document.getElementById('stat-income').textContent = fmt(income);
+  document.getElementById('stat-expense').textContent = fmt(expense);
+  document.getElementById('stat-infak').textContent = fmt(infak);
+  document.getElementById('stat-count').textContent = monthTxs.length;
+
+  // Recent 5
+  const list = document.getElementById('recent-tx-list');
+  const recent = db.transactions.slice(0, 5);
+  if (recent.length === 0) {
+    list.innerHTML = emptyState();
+  } else {
+    list.innerHTML = recent.map(txHTML).join('');
+  }
+}
+
+function emptyState() {
+  return `<div class="empty-state">
+    <div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+    <div class="empty-title">Belum ada transaksi</div>
+    <div class="empty-desc">Mulai catat kas pengajian Anda dengan menekan tombol + di bawah.</div>
+  </div>`;
+}
+
+function txIcon(type) {
+  if (type === 'income') return `<div class="tx-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div>`;
+  if (type === 'expense') return `<div class="tx-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div>`;
+  return `<div class="tx-icon amber"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div>`;
+}
+
+function txHTML(tx) {
+  const amtClass = tx.type === 'income' ? 'pos' : tx.type === 'expense' ? 'neg' : 'inf';
+  const prefix = tx.type === 'income' ? '+' : '-';
+  return `<div class="tx-item" onclick="showDetail('${tx.id}')">
+    ${txIcon(tx.type)}
+    <div class="tx-info">
+      <div class="tx-name">${tx.source || (tx.type === 'income' ? 'Pemasukan' : tx.type === 'expense' ? 'Pengeluaran' : 'Infak Harian')}</div>
+      <div class="tx-date">${fmtDate(tx.date)}, ${fmtTime(tx.createdAt)}</div>
+    </div>
+    <div class="tx-amount ${amtClass}">${prefix}${fmt(tx.amount)}</div>
+    <button class="tx-menu-btn" onclick="event.stopPropagation();showCtx('${tx.id}',event)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+    </button>
+  </div>`;
+}
+
+// ==================== TRANSACTIONS ====================
+function setFilter(filter, el) {
+  txFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTransactions();
+}
+
+function renderTransactions() {
+  const q = document.getElementById('search-input')?.value.toLowerCase() || '';
+  let txs = db.transactions.filter(t => {
+    if (txFilter !== 'all' && t.type !== txFilter) return false;
+    if (q && !((t.source||'').toLowerCase().includes(q) || fmt(t.amount).includes(q))) return false;
+    return true;
+  });
+
+  const list = document.getElementById('all-tx-list');
+  if (txs.length === 0) {
+    list.innerHTML = emptyState();
+  } else {
+    list.innerHTML = txs.map(txHTML).join('');
+  }
+}
+
+// ==================== REPORT ====================
+function setReportTab(tab, el) {
+  reportTab = tab;
+  reportPeriodOffset = 0;
+  document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderReport();
+}
+
+function changePeriod(dir) {
+  reportPeriodOffset += dir;
+  renderReport();
+}
+
+function renderReport() {
+  const now = new Date();
+  let start, end, label;
+  const o = reportPeriodOffset;
+
+  if (reportTab === 'today') {
+    const d = new Date(now);
+    d.setDate(d.getDate() + o);
+    start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+    label = start.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  } else if (reportTab === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth() + o, 1);
+    end = new Date(now.getFullYear(), now.getMonth() + o + 1, 0, 23, 59, 59);
+    label = start.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  } else {
+    const y = now.getFullYear() + o;
+    start = new Date(y, 0, 1);
+    end = new Date(y, 11, 31, 23, 59, 59);
+    label = String(y);
+  }
+
+  document.getElementById('period-label').textContent = label;
+
+  const filtered = db.transactions.filter(t => {
+    const d = new Date(t.date);
+    return d >= start && d <= end;
+  });
+
+  const income = filtered.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  const expense = filtered.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+  const infak = filtered.filter(t => t.type === 'infak').reduce((s,t) => s+t.amount, 0);
+  const balance = income - expense - infak;
+
+  document.getElementById('rep-income').textContent = fmt(income);
+  document.getElementById('rep-expense').textContent = fmt(expense);
+  document.getElementById('rep-infak').textContent = fmt(infak);
+  document.getElementById('rep-balance').textContent = fmt(balance);
+
+  // Chart
+  renderChart(start, end, filtered);
+
+  // TX List
+  const list = document.getElementById('report-tx-list');
+  if (filtered.length === 0) {
+    list.innerHTML = emptyState();
+  } else {
+    list.innerHTML = filtered.map(txHTML).join('');
+  }
+}
+
+function renderChart(start, end, filtered) {
+  const barsEl = document.getElementById('chart-bars');
+  const labelsEl = document.getElementById('chart-labels');
+
+  let buckets = [];
+  if (reportTab === 'today') {
+    for (let h = 0; h < 24; h += 4) {
+      buckets.push({ label: h+'h', income: 0, expense: 0 });
+    }
+    filtered.forEach(t => {
+      const h = new Date(t.createdAt).getHours();
+      const idx = Math.floor(h / 4);
+      if (t.type === 'income') buckets[idx].income += t.amount;
+      else if (t.type === 'expense') buckets[idx].expense += t.amount;
+    });
+  } else if (reportTab === 'month') {
+    const weeks = 5;
+    for (let w = 0; w < weeks; w++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + w * 7);
+      buckets.push({ label: d.getDate() + '/' + (d.getMonth()+1), income: 0, expense: 0 });
+    }
+    filtered.forEach(t => {
+      const d = new Date(t.date);
+      const diff = Math.floor((d - start) / (7 * 24 * 3600 * 1000));
+      const idx = Math.min(diff, weeks - 1);
+      if (idx >= 0) {
+        if (t.type === 'income') buckets[idx].income += t.amount;
+        else if (t.type === 'expense') buckets[idx].expense += t.amount;
+      }
+    });
+  } else {
+    for (let m = 0; m < 12; m++) {
+      const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+      buckets.push({ label: months[m], income: 0, expense: 0 });
+    }
+    filtered.forEach(t => {
+      const m = new Date(t.date).getMonth();
+      if (t.type === 'income') buckets[m].income += t.amount;
+      else if (t.type === 'expense') buckets[m].expense += t.amount;
+    });
+  }
+
+  const max = Math.max(...buckets.map(b => Math.max(b.income, b.expense)), 1);
+  barsEl.innerHTML = buckets.map(b => {
+    const ih = Math.max((b.income / max) * 100, b.income > 0 ? 4 : 0);
+    const eh = Math.max((b.expense / max) * 100, b.expense > 0 ? 4 : 0);
+    return `<div class="chart-bar-group">
+      <div class="chart-bar income" style="height:${ih}%"></div>
+      <div class="chart-bar expense" style="height:${eh}%"></div>
+    </div>`;
+  }).join('');
+  labelsEl.innerHTML = buckets.map(b => `<div class="chart-label">${b.label}</div>`).join('');
+}
+
+// ==================== CONTEXT MENU ====================
+function showCtx(id, e) {
+  ctxId = id;
+  const menu = document.getElementById('ctx-menu');
+  const rect = e.target.closest('button').getBoundingClientRect();
+  const appRect = document.getElementById('app').getBoundingClientRect();
+
+  let top = rect.bottom - appRect.top + 4;
+  let left = rect.right - appRect.left - 160;
+
+  if (left < 8) left = 8;
+  if (top + 100 > window.innerHeight) top = rect.top - appRect.top - 108;
+
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+  menu.classList.add('show');
+
+  setTimeout(() => document.addEventListener('click', closeCtxOnce, { once: true }), 10);
+}
+
+function closeCtxOnce() {
+  document.getElementById('ctx-menu').classList.remove('show');
+}
+
+function editFromCtx() {
+  document.getElementById('ctx-menu').classList.remove('show');
+  showDetail(ctxId);
+}
+
+function deleteFromCtx() {
+  document.getElementById('ctx-menu').classList.remove('show');
+  deleteTx(ctxId);
+}
+
+// ==================== DETAIL ====================
+function showDetail(id) {
+  detailId = id;
+  const tx = db.transactions.find(t => t.id === id);
+  if (!tx) return;
+  const typeLabel = tx.type === 'income' ? 'Pemasukan' : tx.type === 'expense' ? 'Pengeluaran' : 'Infak';
+  const amtClass = tx.type === 'income' ? 'pos' : tx.type === 'expense' ? 'neg' : 'inf';
+  const prefix = tx.type === 'income' ? '+' : '-';
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-row"><div class="detail-key">Jenis</div><div class="detail-val">${typeLabel}</div></div>
+    <div class="detail-row"><div class="detail-key">Keterangan</div><div class="detail-val">${tx.source || '-'}</div></div>
+    <div class="detail-row"><div class="detail-key">Tanggal</div><div class="detail-val">${fmtDate(tx.date)}</div></div>
+    <div class="detail-row"><div class="detail-key">Waktu</div><div class="detail-val">${fmtTime(tx.createdAt)}</div></div>
+    <div class="detail-row"><div class="detail-key">Nominal</div><div class="detail-val tx-amount ${amtClass}">${prefix}${fmt(tx.amount)}</div></div>
+  `;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal').classList.remove('open');
+}
+
+function deleteFromDetail() {
+  closeDetailModal();
+  deleteTx(detailId);
+}
+
+// ==================== DELETE TX ====================
+function deleteTx(id) {
+  db.transactions = db.transactions.filter(t => t.id !== id);
+  saveDB();
+  renderDashboard();
+  if (currentPage === 'transactions') renderTransactions();
+  if (currentPage === 'report') renderReport();
+  showToast('Transaksi dihapus', 'info');
+}
+
+// ==================== TOGGLE BALANCE ====================
+function toggleBalanceVisibility() {
+  balanceHidden = !balanceHidden;
+  document.getElementById('hero-balance').classList.toggle('hidden', balanceHidden);
+  const eyeIcon = document.getElementById('eye-icon');
+  eyeIcon.innerHTML = balanceHidden
+    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>'
+    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+}
+
+// ==================== DARK MODE ====================
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem(DARK_KEY, isDark ? 'false' : 'true');
+  document.getElementById('dark-toggle').classList.toggle('on', !isDark);
+}
+
+// ==================== CONFIRM DELETE ====================
+function confirmDelete() {
+  document.getElementById('confirm-overlay').classList.add('show');
+  document.getElementById('confirm-modal').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+
+function deleteAllData() {
+  db.transactions = [];
+  saveDB();
+  closeConfirm();
+  renderDashboard();
+  showToast('Semua data berhasil dihapus', 'info');
+}
+
+// ==================== EXPORT / IMPORT ====================
+function backupData() {
+  const json = JSON.stringify(db, null, 2);
+  download('kas_pengajian_backup.json', json, 'application/json');
+  showToast('Backup berhasil diunduh', 'success');
+}
+
+function exportJSON() {
+  const json = JSON.stringify(db.transactions, null, 2);
+  download('transaksi.json', json, 'application/json');
+  showToast('Export JSON berhasil', 'success');
+}
+
+function exportCSV() {
+  const headers = ['ID','Jenis','Keterangan','Tanggal','Nominal','Dibuat'];
+  const rows = db.transactions.map(t => [
+    t.id, t.type, t.source||'', t.date, t.amount, t.createdAt
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  download('transaksi.csv', csv, 'text/csv');
+  showToast('Export CSV berhasil', 'success');
+}
+
+function restoreData() {
+  document.getElementById('file-input').click();
+}
+
+function handleRestore(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.transactions) {
+        db = data;
+      } else if (Array.isArray(data)) {
+        db.transactions = data;
+      } else {
+        showToast('Format file tidak valid', 'error');
+        return;
+      }
+      saveDB();
+      renderDashboard();
+      showToast('Data berhasil dipulihkan', 'success');
+    } catch(err) {
+      showToast('Gagal membaca file', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function download(name, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==================== TOAST ====================
+function showToast(msg, type = 'success') {
+  const icons = {
+    success: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+    error: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+    info: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+  };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = icons[type] + msg;
+  const container = document.getElementById('toast-container');
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut 300ms forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+
+// ==================== SEED DATA (demo) ====================
+function seedDemoData() {
+  if (db.transactions.length > 0) return;
+  const now = new Date();
+  const demoData = [
+    { type: 'income', amount: 500000, source: 'Donatur Bapak Ahmad', daysAgo: 0 },
+    { type: 'infak', amount: 350000, source: 'Infak Harian', daysAgo: 0 },
+    { type: 'expense', amount: 250000, source: 'Konsumsi Pengajian', daysAgo: 0 },
+    { type: 'income', amount: 1250000, source: 'Kas Mingguan', daysAgo: 1 },
+    { type: 'expense', amount: 150000, source: 'Transport Ustadz', daysAgo: 1 },
+    { type: 'infak', amount: 280000, source: 'Infak Harian', daysAgo: 1 },
+    { type: 'income', amount: 750000, source: 'Donasi Online', daysAgo: 3 },
+    { type: 'expense', amount: 200000, source: 'Perlengkapan Pengajian', daysAgo: 5 },
+    { type: 'income', amount: 2000000, source: 'Donatur Ibu Siti', daysAgo: 7 },
+    { type: 'infak', amount: 420000, source: 'Infak Jumat', daysAgo: 7 },
+  ];
+  demoData.forEach((d, i) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() - d.daysAgo);
+    const created = new Date(date);
+    created.setHours(8 + i, 15, 0, 0);
+    db.transactions.push({
+      id: (Date.now() - i * 1000).toString(),
+      type: d.type,
+      amount: d.amount,
+      source: d.source,
+      date: date.toISOString().split('T')[0],
+      createdAt: created.toISOString()
+    });
+  });
+  saveDB();
+}
+
+// ==================== START ====================
+seedDemoData();
+init();
+</script>
+</body>
+</html>
